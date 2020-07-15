@@ -98,3 +98,7 @@ Device Path      Serial Number          Size     Type   RPM Bus Speed       IDEN
 /dev/sdj         15R0A07PFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
 
 ```
+  
+After running this process, the changes to the fault LED could be seen in the server's BMC  
+  
+![LED-Changes](images/fault-led-test.png)
