@@ -98,20 +98,6 @@ func extractDev(devicePath string) (string, error) {
 	return components[len(components)-1], nil
 }
 
-// // diskSize : extract disk size (blocks) from sysfs path
-// func diskSize(devicePath string) (int64, error) {
-// 	var path string
-// 	var content string
-// 	var size int64
-
-// 	devName, _ := extractDev(devicePath)
-
-// 	path = "/sys/class/block/" + devName + "/size"
-// 	content, _ = readFile(path)
-// 	size, _ = strconv.ParseInt(content, 10, 64)
-// 	return size, nil
-// }
-
 // getDeviceAttr : read sysfs for a device attribute
 func getDeviceAttr(devicePath string, attr string) (string, error) {
 	var err error
