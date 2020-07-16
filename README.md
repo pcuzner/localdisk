@@ -111,3 +111,5 @@ wwid           : naa.500003960831b065
 After running this process, the changes to the fault LED could be seen in the server's BMC  
   
 ![LED-Changes](images/fault-led-test.png)
+
+The CLI and GUI output shown above is from an old Dell r730 server, running RHEL7.4. It's reasonable to expect a more modern server to provide better information and support for features like disk IDENT and flash drive health.
