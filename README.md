@@ -22,80 +22,89 @@ e.g.
 ## Running the tool
 1. Example options
 ```
-localdisk -h
+[root@srv-01 bin]# localdisk -h
 Usage of localdisk:
-  -disk-fail-led-off string
-        de-activate fail LED on a given device
-  -disk-fail-led-on string
-        activate fail LED on a given device
+  -fail-led-off string
+    	de-activate fail LED on a given device
+  -fail-led-on string
+    	activate fail LED on a given device
   -list
-        list all local disks
+    	list all local disks
+  -show string
+    	show a specific disk matching given /dev name
+
 ```
 2. Turn on fail LED
 ```
-localdisk -disk-fail-led-on /dev/sda
+localdisk -fail-led-on /dev/sda
 ```
-3. Turn off fail beacon
+3. Turn off fail LED
 ```
-localdisk -disk-fail-led-off /dev/sda
+localdisk -fail-led-off /dev/sda
 ```
 
 ## Output Examples
 1. Disk list
 ```
 [root@srv-01 ~]# localdisk -list
-Device Path      Serial Number          Size     Type   RPM Bus Speed       IDENT        FAIL  Health
-/dev/sda         15P0A0R0FRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdb         15P0A0YFFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdk         15P0A0ONFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdl         15P0A0YBFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdm         BTWL452503K7480QGN   937703088 IDE/SATA     0      6000     UNKNOWN         OFF Unknown
-/dev/sdn         BTWL452503PJ480QGN   937703088 IDE/SATA     0      6000     UNKNOWN         OFF Unknown
-/dev/sdo         BTWL452503K2480QGN   937703088 IDE/SATA     0      6000     UNKNOWN         OFF Unknown
-/dev/sdp         BTWL452503PF480QGN   937703088 IDE/SATA     0      6000     UNKNOWN         OFF Unknown
-/dev/sdc         15R0A08WFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdd         15R0A07DFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sde         15P0A0QDFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdf         15R0A064FRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdg         15P0A0QWFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdh         15P0A0O8FRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdi         15P0A0RFFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdj         15R0A07PFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
+Device Path        Type Serial Number              Size Sector  Transport   RPM Bus Speed       IDENT        FAIL  Health           Vendor            Model Revision                 wwid
+/dev/sda            HDD 15P0A0R0FRD6          279.4 GiB    512        SAS 10000      6000     UNKNOWN         OFF    Good          TOSHIBA       AL13SEB300     DE0D naa.50000396082ba631
+/dev/sdb            HDD 15P0A0YFFRD6          279.4 GiB    512        SAS 10000      6000     UNKNOWN         OFF    Good          TOSHIBA       AL13SEB300     DE0D naa.50000396082bbbf9
+/dev/sdk            HDD 15P0A0ONFRD6          279.4 GiB    512        SAS 10000      6000     UNKNOWN         OFF    Good          TOSHIBA       AL13SEB300     DE0D naa.50000396082b989d
+/dev/sdl            HDD 15P0A0YBFRD6          279.4 GiB    512        SAS 10000      6000     UNKNOWN         OFF    Good          TOSHIBA       AL13SEB300     DE0D naa.50000396082bb9d1
+/dev/sdm          Flash BTWL452503K7480QGN       447.1 GiB   512e   IDE/SATA     0      6000     UNKNOWN         OFF Unknown              ATA INTEL SSDSC2BB48     DL13 naa.55cd2e404b753fb0
+/dev/sdn          Flash BTWL452503PJ480QGN       447.1 GiB   512e   IDE/SATA     0      6000     UNKNOWN         OFF Unknown              ATA INTEL SSDSC2BB48     DL13 naa.55cd2e404b754043
+/dev/sdo          Flash BTWL452503K2480QGN       447.1 GiB   512e   IDE/SATA     0      6000     UNKNOWN         OFF Unknown              ATA INTEL SSDSC2BB48     DL13 naa.55cd2e404b753fab
+/dev/sdp          Flash BTWL452503PF480QGN       447.1 GiB   512e   IDE/SATA     0      6000     UNKNOWN         OFF Unknown              ATA INTEL SSDSC2BB48     DL13 naa.55cd2e404b754040
+/dev/sdc            HDD 15R0A08WFRD6          279.4 GiB    512        SAS 10000      6000     UNKNOWN         OFF    Good          TOSHIBA       AL13SEB300     DE0D naa.500003960831c74d
+/dev/sdd            HDD 15R0A07DFRD6          279.4 GiB    512        SAS 10000      6000     UNKNOWN         OFF    Good          TOSHIBA       AL13SEB300     DE0D naa.500003960831bfbd
+/dev/sde            HDD 15P0A0QDFRD6          279.4 GiB    512        SAS 10000      6000     UNKNOWN         OFF    Good          TOSHIBA       AL13SEB300     DE0D naa.50000396082ba3a1
+/dev/sdf            HDD 15R0A064FRD6          279.4 GiB    512        SAS 10000      6000     UNKNOWN         OFF    Good          TOSHIBA       AL13SEB300     DE0D naa.500003960831b065
+/dev/sdg            HDD 15P0A0QWFRD6          279.4 GiB    512        SAS 10000      6000     UNKNOWN         OFF    Good          TOSHIBA       AL13SEB300     DE0D naa.50000396082ba5fd
+/dev/sdh            HDD 15P0A0O8FRD6          279.4 GiB    512        SAS 10000      6000     UNKNOWN         OFF    Good          TOSHIBA       AL13SEB300     DE0D naa.50000396082b9675
+/dev/sdi            HDD 15P0A0RFFRD6          279.4 GiB    512        SAS 10000      6000     UNKNOWN         OFF    Good          TOSHIBA       AL13SEB300     DE0D naa.50000396082ba709
+/dev/sdj            HDD 15R0A07PFRD6          279.4 GiB    512        SAS 10000      6000     UNKNOWN         OFF    Good          TOSHIBA       AL13SEB300     DE0D naa.500003960831c051
+
 ```
-2. Turning on the fail LED
+2. Turning the fail LED ON
 ```
-[root@srv-01 ~]# localdisk -list 
-Device Path      Serial Number          Size     Type   RPM Bus Speed       IDENT        FAIL  Health
-/dev/sda         15P0A0R0FRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-:
-/dev/sdf         15R0A064FRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdg         15P0A0QWFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdh         15P0A0O8FRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdi         15P0A0RFFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdj         15R0A07PFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-
-
-[root@srv-01 ~]# localdisk -disk-fail-led-on /dev/sdf
-[root@srv-01 ~]# localdisk -list 
-Device Path      Serial Number          Size     Type   RPM Bus Speed       IDENT        FAIL  Health
-/dev/sda         15P0A0R0FRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-:
-/dev/sdf         15R0A064FRD6      585937500      SAS 10000      6000     UNKNOWN          ON    Good   <---
-/dev/sdg         15P0A0QWFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdh         15P0A0O8FRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdi         15P0A0RFFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdj         15R0A07PFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-
-[root@srv-01 ~]# localdisk -disk-fail-led-off /dev/sdf
-[root@srv-01 ~]# localdisk -list 
-Device Path      Serial Number          Size     Type   RPM Bus Speed       IDENT        FAIL  Health
-/dev/sda         15P0A0R0FRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-
-/dev/sdf         15R0A064FRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good   <---
-/dev/sdg         15P0A0QWFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdh         15P0A0O8FRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdi         15P0A0RFFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
-/dev/sdj         15R0A07PFRD6      585937500      SAS 10000      6000     UNKNOWN         OFF    Good
+[root@srv-01 bin]# localdisk -fail-led-on /dev/sdf
+[root@srv-01 bin]# localdisk -show /dev/sdf
+Device Path    : /dev/sdf
+Type           : HDD
+Serial Number  : 15R0A064FRD6
+Size           : 279.4 GiB
+Sector Format  : 512
+Transport      : SAS
+RPM            : 10000
+Bus Speed      : 6000
+IDENT LED      : UNKNOWN
+FAIL LED       : ON                   <-----
+Health         : Good
+Vendor         : TOSHIBA
+Model          : AL13SEB300
+Revision       : DE0D
+wwid           : naa.500003960831b065
+```
+3. Turning the fail LED OFF
+```
+[root@srv-01 ~]# localdisk -fail-led-off /dev/sdf
+[root@srv-01 ~]# localdisk -show /dev/sdf
+Device Path    : /dev/sdf
+Type           : HDD
+Serial Number  : 15R0A064FRD6
+Size           : 279.4 GiB
+Sector Format  : 512
+Transport      : SAS
+RPM            : 10000
+Bus Speed      : 6000
+IDENT LED      : UNKNOWN
+FAIL LED       : OFF                  <-----
+Health         : Good
+Vendor         : TOSHIBA
+Model          : AL13SEB300
+Revision       : DE0D
+wwid           : naa.500003960831b065
 
 ```
   
