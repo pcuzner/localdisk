@@ -12,6 +12,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 
@@ -46,7 +47,8 @@ type disk struct {
 	devType      string
 	serialNumber string
 	vpd83        string
-	size         int64
+	sizeBytes    int64
+	sizeSectors  int64
 	transport    string
 	linkSpeed    uint32
 	rpm          int32
@@ -57,6 +59,22 @@ type disk struct {
 	revision     string
 	vendor       string
 	wwid         string
+	sectorFormat string
+}
+
+// bytesToHuman : convert a bytes value to a human readable format
+func bytesToHuman(b int64) string {
+	//
+	const unit = 1024
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %ciB", float64(b)/float64(div), "KMGTPE"[exp])
 }
 
 // ConvertLedStatus : return a text value for an led state bit
@@ -118,17 +136,40 @@ func getDiskInfo(devPath string, disk *disk) error {
 	var linkType lsm.DiskLinkType
 	var ledStatus lsm.DiskLedStatusBitField
 
+	if _, err := os.Stat(devPath); os.IsNotExist(err) {
+		return errors.New("Device path not found")
+	}
+
 	disk.devPath = devPath
 	disk.serialNumber, _ = localdisk.SerialNumGet(devPath)
 
+	// We supplement the data available from LSM with direct queries into sysfs
 	devName, _ := extractDev(devPath)
 	sizeStr, _ := getDeviceAttr(devPath, "/block/"+devName+"/size")
-	disk.size, _ = strconv.ParseInt(sizeStr, 10, 64)
+	disk.sizeSectors, _ = strconv.ParseInt(sizeStr, 10, 64)
 	disk.model, _ = getDeviceAttr(devPath, "model")
 	disk.vendor, _ = getDeviceAttr(devPath, "vendor")
 	disk.wwid, _ = getDeviceAttr(devPath, "wwid")
 	disk.revision, _ = getDeviceAttr(devPath, "rev")
-	health, _ = localdisk.HealthStatusGet(devPath) // -1 = unknown, 2 Good
+	physicalSector, _ := getDeviceAttr(devPath, "/block/"+devName+"/queue/physical_block_size")
+	logicalSector, _ := getDeviceAttr(devPath, "/block/"+devName+"/queue/logical_block_size")
+	if logicalSector == physicalSector {
+		if logicalSector == "512" {
+			disk.sectorFormat = "512"
+		} else {
+			disk.sectorFormat = "4KN"
+		}
+	} else {
+		disk.sectorFormat = "512e"
+	}
+	if disk.sectorFormat == "4KN" {
+		logicalSectorInt, _ := strconv.ParseInt(logicalSector, 10, 64)
+		disk.sizeBytes = disk.sizeSectors * logicalSectorInt
+	} else {
+		disk.sizeBytes = disk.sizeSectors * 512
+	}
+
+	health, _ = localdisk.HealthStatusGet(devPath)
 	disk.health = healthText[health]
 	disk.rpm, _ = localdisk.RpmGet(devPath)
 
@@ -171,18 +212,19 @@ func setFailLed(devPath string, state string) error {
 	}
 }
 
-// ShowDisks : show all the local disks on the system
-func showDisks() {
+// listDisks : show all the local disks on the system
+func listDisks() {
 	var disks []string
 	var disk disk
 
 	disks, _ = localdisk.List()
 	// TODO check if list has entries
-	fmt.Println(fmt.Sprintf("%-16s %6s %-15s %11s %10s %5s %9s %11s %11s %7s %16s %16s %8s %20s",
+	fmt.Println(fmt.Sprintf("%-16s %6s %-15s %15s %6s %10s %5s %9s %11s %11s %7s %16s %16s %8s %20s",
 		"Device Path",
 		"Type",
 		"Serial Number",
 		"Size",
+		"Sector",
 		"Transport",
 		"RPM",
 		"Bus Speed",
@@ -197,11 +239,12 @@ func showDisks() {
 	for _, devPath := range disks {
 		_ = getDiskInfo(devPath, &disk)
 
-		fmt.Println(fmt.Sprintf("%-16s %6s %-15s %11d %10s %5d %9d %11s %11s %7s %16s %16s %8s %20s",
+		fmt.Println(fmt.Sprintf("%-16s %6s %-15s %15s %6s %10s %5d %9d %11s %11s %7s %16s %16s %8s %20s",
 			disk.devPath,
 			disk.devType,
 			disk.serialNumber,
-			disk.size,
+			bytesToHuman(disk.sizeBytes),
+			disk.sectorFormat,
 			disk.transport,
 			disk.rpm,
 			disk.linkSpeed,
@@ -215,17 +258,52 @@ func showDisks() {
 	}
 }
 
+// showDisk : Show details for a specific disk
+func showDisk(devPath string) {
+	var disk disk
+	var err error
+
+	err = getDiskInfo(devPath, &disk)
+	if err != nil {
+		fmt.Println("Unable to list device " + devPath)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Device Path    : %s\n", (disk.devPath))
+	fmt.Printf("Type           : %s\n", (disk.devType))
+	fmt.Printf("Serial Number  : %s\n", (disk.serialNumber))
+	fmt.Printf("Size           : %s\n", (bytesToHuman(disk.sizeBytes)))
+	fmt.Printf("Sector Format  : %s\n", (disk.sectorFormat))
+	fmt.Printf("Transport      : %s\n", (disk.transport))
+	fmt.Printf("RPM            : %d\n", (disk.rpm))
+	fmt.Printf("Bus Speed      : %d\n", (disk.linkSpeed))
+	fmt.Printf("IDENT LED      : %s\n", (disk.ledIdent))
+	fmt.Printf("FAIL LED       : %s\n", (disk.ledFail))
+	fmt.Printf("Health         : %s\n", (disk.health))
+	fmt.Printf("Vendor         : %s\n", (disk.vendor))
+	fmt.Printf("Model          : %s\n", (disk.model))
+	fmt.Printf("Revision       : %s\n", (disk.revision))
+	fmt.Printf("wwid           : %s\n", (disk.wwid))
+}
+
 func main() {
 	var err error
 
 	listDisksPtr := flag.Bool("list", false, "list all local disks")
-	setFailOnPtr := flag.String("disk-fail-led-on", "", "activate fail LED on a given device")
-	setFailOffPtr := flag.String("disk-fail-led-off", "", "de-activate fail LED on a given device")
+	getDiskPtr := flag.String("show", "", "show a specific disk matching given /dev name")
+	setFailOnPtr := flag.String("fail-led-on", "", "activate fail LED on a given device")
+	setFailOffPtr := flag.String("fail-led-off", "", "de-activate fail LED on a given device")
 	flag.Parse()
 
 	if *listDisksPtr {
-		showDisks()
-	} else {
+		listDisks()
+		os.Exit(0)
+	}
+	if *getDiskPtr != "" {
+		showDisk(*getDiskPtr)
+		os.Exit(0)
+	}
+	if *setFailOnPtr != "" || *setFailOffPtr != "" {
 		if *setFailOnPtr != "" {
 			err = setFailLed(*setFailOnPtr, "on")
 		}
